@@ -1,0 +1,154 @@
+# chandef-cases.tsv - channel/width matrix for run_chandef_vif_host.sh (todo 4.5)
+#
+# Columns (TAB separated):
+#   case_id  phase(setfreq|hop|converge)  freq  width  center  set_tier  tx_probe
+#   tx_tier_template  tx_tier_constructed
+#
+# width uses iw set-freq tokens (HT20/HT40-/HT40+/NOHT/5/10/80/160/80+80); center '-' = absent.
+#
+# Context model (v7+ driver truth):
+#   The managed template latched at monitor entry stays valid on its own
+#   frequency/width (or narrowed to 20 MHz). Every other channel falls back to
+#   the constructed context, which follows the monitor width (HT>=40, 5G VHT
+#   >=80, 6G HE incl. widths) since the v7 maxsqueeze unlock.
+#
+# Coverage: every iw-phy channel NOT flagged disabled on v10 (2.4G ch1-14,
+# 5G 36-173, 6G ch1-233) plus width probes. DFS-family 5G rows stay
+# observation (radar/CAC is FW-owned); 5885/ch177 and 5935/ch2 are disabled
+# in the live regdom and intentionally excluded.
+#
+# tx tiers:
+#   must_complete         set must be accepted and the frame must get a FW
+#                         completion round trip
+#   must_refuse_either    a precise refusal at either layer passes: the set
+#                         itself refused with an errno, or the set was
+#                         accepted and TX terminally rejected with
+#                         drop_reason_context (never a silent completion)
+#   observation           outcome recorded, no pass/fail judgement
+#   '-'                   no TX probe for this row
+#
+# setfreq rows: 109
+ch.24g.2412.ht20	setfreq	2412	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2417.ht20	setfreq	2417	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2422.ht20	setfreq	2422	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2427.ht20	setfreq	2427	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2432.ht20	setfreq	2432	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2437.ht20	setfreq	2437	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2442.ht20	setfreq	2442	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2447.ht20	setfreq	2447	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2452.ht20	setfreq	2452	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2457.ht20	setfreq	2457	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2462.ht20	setfreq	2462	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2467.ht20	setfreq	2467	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2472.ht20	setfreq	2472	HT20	-	must_accept	1	must_complete	must_complete
+ch.24g.2484.ht20	setfreq	2484	HT20	-	observation	1	observation	observation
+ch.24g.2412.40p	setfreq	2412	HT40+	-	observation	1	must_complete	must_complete
+ch.5g.5180.ht20	setfreq	5180	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5200.ht20	setfreq	5200	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5220.ht20	setfreq	5220	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5240.ht20	setfreq	5240	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5720.ht20	setfreq	5720	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5745.ht20	setfreq	5745	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5765.ht20	setfreq	5765	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5785.ht20	setfreq	5785	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5805.ht20	setfreq	5805	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5825.ht20	setfreq	5825	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5845.ht20	setfreq	5845	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5865.ht20	setfreq	5865	HT20	-	must_accept	1	must_complete	must_complete
+ch.5g.5260.ht20	setfreq	5260	HT20	-	observation	1	observation	observation
+ch.5g.5280.ht20	setfreq	5280	HT20	-	observation	1	observation	observation
+ch.5g.5300.ht20	setfreq	5300	HT20	-	observation	1	observation	observation
+ch.5g.5320.ht20	setfreq	5320	HT20	-	observation	1	observation	observation
+ch.5g.5500.ht20	setfreq	5500	HT20	-	observation	1	observation	observation
+ch.5g.5520.ht20	setfreq	5520	HT20	-	observation	1	observation	observation
+ch.5g.5540.ht20	setfreq	5540	HT20	-	observation	1	observation	observation
+ch.5g.5560.ht20	setfreq	5560	HT20	-	observation	1	observation	observation
+ch.5g.5580.ht20	setfreq	5580	HT20	-	observation	1	observation	observation
+ch.5g.5600.ht20	setfreq	5600	HT20	-	observation	1	observation	observation
+ch.5g.5620.ht20	setfreq	5620	HT20	-	observation	1	observation	observation
+ch.5g.5640.ht20	setfreq	5640	HT20	-	observation	1	observation	observation
+ch.5g.5660.ht20	setfreq	5660	HT20	-	observation	1	observation	observation
+ch.5g.5680.ht20	setfreq	5680	HT20	-	observation	1	observation	observation
+ch.5g.5700.ht20	setfreq	5700	HT20	-	observation	1	observation	observation
+ch.5g.5745.80	setfreq	5745	80	5775	must_accept	1	must_complete	must_refuse_either
+ch.5g.5745.40p	setfreq	5745	HT40+	-	observation	1	must_complete	must_complete
+ch.5g.5745.40m	setfreq	5745	HT40-	-	observation	1	must_complete	must_complete
+ch.5g.5180.80	setfreq	5180	80	5210	observation	1	must_complete	must_complete
+ch.6g.5955.ht20	setfreq	5955	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.5975.ht20	setfreq	5975	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.5995.ht20	setfreq	5995	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6015.ht20	setfreq	6015	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6035.ht20	setfreq	6035	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6055.ht20	setfreq	6055	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6075.ht20	setfreq	6075	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6095.ht20	setfreq	6095	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6115.ht20	setfreq	6115	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6135.ht20	setfreq	6135	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6155.ht20	setfreq	6155	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6175.ht20	setfreq	6175	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6195.ht20	setfreq	6195	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6215.ht20	setfreq	6215	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6235.ht20	setfreq	6235	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6255.ht20	setfreq	6255	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6275.ht20	setfreq	6275	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6295.ht20	setfreq	6295	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6315.ht20	setfreq	6315	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6335.ht20	setfreq	6335	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6355.ht20	setfreq	6355	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6375.ht20	setfreq	6375	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6395.ht20	setfreq	6395	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6415.ht20	setfreq	6415	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6435.ht20	setfreq	6435	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6455.ht20	setfreq	6455	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6475.ht20	setfreq	6475	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6495.ht20	setfreq	6495	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6515.ht20	setfreq	6515	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6535.ht20	setfreq	6535	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6555.ht20	setfreq	6555	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6575.ht20	setfreq	6575	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6595.ht20	setfreq	6595	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6615.ht20	setfreq	6615	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6635.ht20	setfreq	6635	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6655.ht20	setfreq	6655	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6675.ht20	setfreq	6675	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6695.ht20	setfreq	6695	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6715.ht20	setfreq	6715	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6735.ht20	setfreq	6735	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6755.ht20	setfreq	6755	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6775.ht20	setfreq	6775	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6795.ht20	setfreq	6795	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6815.ht20	setfreq	6815	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6835.ht20	setfreq	6835	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6855.ht20	setfreq	6855	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6875.ht20	setfreq	6875	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6895.ht20	setfreq	6895	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6915.ht20	setfreq	6915	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6935.ht20	setfreq	6935	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6955.ht20	setfreq	6955	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6975.ht20	setfreq	6975	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.6995.ht20	setfreq	6995	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.7015.ht20	setfreq	7015	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.7035.ht20	setfreq	7035	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.7055.ht20	setfreq	7055	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.7075.ht20	setfreq	7075	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.7095.ht20	setfreq	7095	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.7115.ht20	setfreq	7115	HT20	-	must_accept	1	must_complete	must_complete
+ch.6g.5955.80	setfreq	5955	80	5985	observation	1	must_complete	must_complete
+ch.6g.5955.160	setfreq	5955	160	6025	observation	1	must_complete	must_complete
+ch.bad.2412.80	setfreq	2412	80	2457	observation	0	-	-
+ch.bad.5745.ht20center	setfreq	5745	HT20	5775	observation	0	-	-
+# hop rows: 12 rapid set-freq cycles (no per-hop TX; latency + persona survival)
+hop.01	hop	2412	HT20	-	must_accept	0	-	-
+hop.02	hop	5180	HT20	-	must_accept	0	-	-
+hop.03	hop	5745	HT20	-	must_accept	0	-	-
+hop.04	hop	5825	HT20	-	must_accept	0	-	-
+hop.05	hop	2437	HT20	-	must_accept	0	-	-
+hop.06	hop	5805	HT20	-	must_accept	0	-	-
+hop.07	hop	2412	HT20	-	must_accept	0	-	-
+hop.08	hop	5180	HT20	-	must_accept	0	-	-
+hop.09	hop	5745	HT20	-	must_accept	0	-	-
+hop.10	hop	5825	HT20	-	must_accept	0	-	-
+hop.11	hop	2437	HT20	-	must_accept	0	-	-
+hop.12	hop	5805	HT20	-	must_accept	0	-	-
+# converge row: width AUTO = 80MHz/5775 in template mode, HT20 in constructed
+converge.5745	converge	5745	AUTO	AUTO	must_accept	1	must_complete	must_complete

@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+ota/dryrun/work/
+tools/ux/ab-*
+tools/ux/ssr-evidence-*
+tools/fuzz/out/
+*.pcap
+*.pcapng
+ota/kit/phy-ab-*

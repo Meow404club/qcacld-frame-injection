@@ -1,0 +1,1 @@
+../preflight/run_stage0_preflight_device.sh

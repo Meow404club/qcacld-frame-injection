@@ -1,0 +1,347 @@
+#!/usr/bin/env bash
+# mock adb for the kit v10 phy_ab dry-run.
+#
+# Emulates just enough of adb+su+the phone to exercise the full
+# run_stage2_phy_ab.sh orchestration end to end on the host:
+#   - build-id note, /proc/mounts, debugfs stats node with live counters
+#   - bool module param with Y/N readback semantics
+#   - monitor setup/final-state via iw info rendered from the last
+#     set-freq command
+#   - send_stage1_packet --clock / --send: the sender ALWAYS exits 0
+#     (queue-accept, matching the real device where async parse drops are
+#     only visible in stats); accept/reject decisions follow the same
+#     driver contract table the script asserts, which makes the dry-run
+#     an orchestration/plumbing test, not a driver test
+#   - an independent-listener pcap: every accepted frame is appended to
+#     $MOCK_CAPTURE (classic pcap, FCS-absent radiotap, Duration rewritten
+#     to 54 like the FW does; the fcs vector gets an FCS-flagged radiotap
+#     with a freshly computed CRC so the preserved/regenerated path runs)
+# Failure injection:
+#   MOCK_FAIL_SETUP=1   iw set type monitor always fails (exit-4 + trap path)
+#   MOCK_INVERT_HEX=HEX invert the accept/reject decision for one vector
+#                     (contract-violation path, expected exit 7)
+
+set -u
+
+MOCK_ROOT=${MOCK_ROOT:?MOCK_ROOT not set}
+MOCK_CAPTURE=${MOCK_CAPTURE:-}
+MOCK_SERIAL=DRYRUN123
+note_id=${MOCK_BUILD_ID:-4c13f3b3f0b8f03d6904dd871af39164e18afa57}
+
+mkdir -p "$MOCK_ROOT"
+log() { printf '%s\n' "$*" >>"$MOCK_ROOT/adb-call.log"; }
+
+# vector classification table (name<TAB>class), written by run_dryrun.sh
+table=$MOCK_ROOT/vector-class-table
+
+init_file() { [ -f "$MOCK_ROOT/$1" ] || printf '%s\n' "$2" >"$MOCK_ROOT/$1"; }
+init_file clock 1780000000000000000
+init_file param N
+init_file wifi enabled
+init_file iface managed
+for counter in wmi_submitted fw_completion_events fw_complete_ok \
+	parse_failed backend_unsupported drop_reason_backend \
+	drop_reason_fw_width fw_width_bypassed; do
+	init_file "$counter" 0
+done
+
+bump() { # file delta
+	local value
+	value=$(<"$MOCK_ROOT/$1")
+	printf '%s\n' "$((value + $2))" >"$MOCK_ROOT/$1"
+}
+
+next_clock() {
+	local value
+	value=$(<"$MOCK_ROOT/clock")
+	value=$((value + 300000000))
+	printf '%s\n' "$value" >"$MOCK_ROOT/clock"
+	printf '%s\n' "$value"
+}
+
+class_of() { # hex -> knob_family|negative|(empty=unconditional)
+	local hex=$1 name class
+	while IFS=$'\t' read -r name _hex class; do
+		[ "$_hex" = "$hex" ] && { printf '%s\n' "$class"; return; }
+	done <"$table"
+	printf '\n'
+}
+
+emit_stats() {
+	cat <<EOF
+format_version=12
+source_rev=dryrun-mock-v13b
+state=ready
+fatal_latched=0
+mgmt_inflight=0
+system_suspend_restore=0
+last_completion_status=0
+active_request_id=0
+last_completed_request_id=0
+last_terminal_request_id=0
+last_terminal_stage=0
+last_terminal_errno=0
+last_terminal_reason=none
+active_desc_id=0
+last_completed_desc_id=0
+queue_depth=0
+queue_limit=8
+helper_present=1
+helper_state=2
+helper_generation=1
+helper_vdev_id=2
+helper_peer_ready=1
+helper_sta_vdev_up=1
+helper_bss_peer_ready=1
+helper_peer_assoc=1
+helper_aid_valid=1
+helper_power_save_ready=1
+helper_wmm_enabled=1
+helper_sta_context_valid=1
+helper_context_source=constructed
+helper_fw_state_unknown=0
+helper_aid=1
+helper_self_mac=02:ab:cd:00:00:99
+helper_bssid=02:aa:aa:aa:aa:01
+netdev_accepted=0
+worker_dequeued=0
+wmi_submitted=$(<"$MOCK_ROOT/wmi_submitted")
+parse_failed=$(<"$MOCK_ROOT/parse_failed")
+backend_unsupported=$(<"$MOCK_ROOT/backend_unsupported")
+queue_full_events=0
+state_dropped=0
+queue_purged=0
+fatal_errors=0
+watchdog_timeouts=0
+teardown_timeouts=0
+fw_completion_events=$(<"$MOCK_ROOT/fw_completion_events")
+fw_completed=$(<"$MOCK_ROOT/fw_completion_events")
+fw_failed=0
+fw_complete_ok=$(<"$MOCK_ROOT/fw_complete_ok")
+fw_discard=0
+fw_inspect=0
+fw_no_ack=0
+fw_unknown=0
+submit_aborted=0
+unexpected_completions=0
+drop_reason_malformed=0
+drop_reason_conflict=0
+drop_reason_regulatory=0
+drop_reason_context=0
+drop_reason_backend=$(<"$MOCK_ROOT/drop_reason_backend")
+drop_reason_fw=0
+drop_reason_fw_width=$(<"$MOCK_ROOT/drop_reason_fw_width")
+fw_width_bypassed=$(<"$MOCK_ROOT/fw_width_bypassed")
+drop_reason_timeout=0
+drop_reason_recovery=0
+drop_reason_queue=0
+helper_idle_ms=0
+helper_auto_teardowns=0
+EOF
+}
+
+channel_of() {
+	case $1 in
+	2412) echo 1 ;;
+	2437) echo 6 ;;
+	2484) echo 14 ;;
+	5180) echo 36 ;;
+	5745) echo 36 ;;
+	5775) echo 36 ;;
+	5955) echo 1 ;;
+	*) echo 36 ;;
+	esac
+}
+
+append_listener_packet() { # hex clock_ns
+	[ -n "$MOCK_CAPTURE" ] || return 0
+	MOCK_CAPTURE=$MOCK_CAPTURE python3 - "$1" "$2" "$MOCK_SERIAL" <<'PY'
+import binascii
+import os
+import struct
+import sys
+
+hex_text, clock_ns, serial = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+packet = bytes.fromhex(hex_text)
+radiotap_len = packet[2] | (packet[3] << 8)
+mpdu = bytearray(packet[radiotap_len:])
+if hex_text.endswith("5112a79a"):
+    # the fcs_caller_valid vector: emulate a listener whose capture keeps
+    # FCS AND a link that preserved the caller's marker FCS verbatim (an
+    # invalid CRC by construction - exactly the preserved scenario)
+    body = bytes(mpdu[:-4])
+    caller_fcs = bytes(mpdu[-4:])
+    radiotap = bytes([0, 0, 9, 0, 2, 0, 0, 0, 0x10])
+    frame = radiotap + body + caller_fcs
+else:
+    mpdu[2:4] = struct.pack("<H", 54)  # FW-owned Duration rewrite
+    radiotap = bytes([0, 0, 8, 0, 0, 0, 0, 0])
+    frame = radiotap + bytes(mpdu)
+seconds, nanoseconds = divmod(clock_ns, 1_000_000_000)
+record = struct.pack("<IIII", seconds, nanoseconds // 1000,
+                     len(frame), len(frame)) + frame
+with open(os.environ["MOCK_CAPTURE"], "ab") as stream:
+    stream.write(record)
+PY
+}
+
+send_packet() { # hex
+	local hex=$1 param class accept
+	param=$(<"$MOCK_ROOT/param")
+	class=$(class_of "$hex")
+	accept=1
+	case $class in
+	knob_family) [ "$param" = Y ] || accept=0 ;;
+	# v19b+ contract: wide-family vectors ride the peer-fixed-rate bypass
+	# in the on phase (accept + fw_width_bypassed counter); the knob gate
+	# refuses them in the off phase like any other family vector.
+	fw_width)
+		[ "$param" = Y ] || accept=0 ;;
+	negative) accept=0 ;;
+	esac
+	if [ -n "${MOCK_INVERT_HEX:-}" ] && [ "$MOCK_INVERT_HEX" = "$hex" ]; then
+		accept=$((1 - accept))
+	fi
+	if [ "$accept" -eq 1 ]; then
+		bump wmi_submitted 1
+		bump fw_completion_events 1
+		bump fw_complete_ok 1
+		[ "$class" = fw_width ] && bump fw_width_bypassed 1
+		append_listener_packet "$hex" "$(next_clock)"
+		echo "sendto_count=1 packet_len=$(( ${#hex} / 2 )) (mock)"
+		return 0
+	fi
+	bump parse_failed 1
+	bump backend_unsupported 1
+	bump drop_reason_backend 1
+	echo "sendto_count=1 (mock: async parse drop)"  # sendto still returns 0
+	return 0
+}
+
+if [ "${1:-}" = -s ]; then
+	[ "$2" = "$MOCK_SERIAL" ] || { echo "mock adb: unknown serial $2" >&2; exit 1; }
+	shift 2
+fi
+cmd=${1:-}
+shift || true
+case $cmd in
+devices)
+	printf 'List of devices attached\n%s\tdevice\n' "$MOCK_SERIAL"
+	exit 0
+	;;
+esac
+
+case $cmd in
+exec-out)
+	# su -c 'od -An -v -tx1 .../notes/.note.gnu.build-id'
+	spaced=''
+	for ((i = 0; i < 40; i += 2)); do
+		spaced+=" ${note_id:$i:2}"
+	done
+	printf '%s\n' "$spaced"
+	;;
+push)
+	local_path=$1
+	remote_path=$2
+	mapped=$MOCK_ROOT${remote_path%/send_stage1_packet}
+	mkdir -p "$(dirname "$mapped")"
+	cp "$local_path" "$mapped"
+	echo "pushed (mock)"
+	;;
+shell)
+	# strip su -c
+	[ "${1:-}" = su ] && { shift 2; }
+	remote=$1
+	log "$remote"
+	case $remote in
+	'cat /proc/mounts')
+		printf 'rootfs / rootfs rw 0 0\nnone /sys/kernel/debug debugfs rw 0 0\n'
+		;;
+	test\ -r\ /sys/kernel/debug/wlan0/frame_inject_stats)
+		exit 0
+		;;
+	'mount -t debugfs debugfs /sys/kernel/debug' | 'mkdir -p /sys/kernel/debug')
+		exit 0
+		;;
+	cat\ /sys/kernel/debug/wlan0/frame_inject_stats)
+		emit_stats
+		;;
+	'cmd wifi set-wifi-enabled disabled')
+		printf 'disabled\n' >"$MOCK_ROOT/wifi"
+		;;
+	'cmd wifi set-wifi-enabled enabled')
+		printf 'enabled\n' >"$MOCK_ROOT/wifi"
+		;;
+	'cmd wifi status')
+		if [ "$(cat "$MOCK_ROOT/wifi")" = enabled ]; then
+			printf 'Wifi is enabled\nWifi is connected to DRYRUN_5G\nSSID: DRYRUN_5G\nVALIDATED\n'
+		else
+			printf 'Wifi is disabled\n'
+		fi
+		;;
+	'pidof wpa_supplicant')
+		# kit v11 golden persona discipline: supplicant gone once the
+		# setting bit is off (empty stdout, exit 0).
+		exit 0
+		;;
+	'ip link set wlan0 down' | 'ip link set wlan0 up')
+		exit 0
+		;;
+	'iw dev wlan0 set type managed')
+		printf 'managed\n' >"$MOCK_ROOT/iface"
+		;;
+	iw\ dev\ wlan0\ set\ type\ monitor*)
+		if [ -n "${MOCK_FAIL_SETUP:-}" ]; then
+			echo "command failed: Device or resource busy (-16)" >&2
+			exit 1
+		fi
+		printf 'monitor\n' >"$MOCK_ROOT/iface"
+		;;
+	iw\ dev\ wlan0\ set\ freq\ *)
+		read -r _ _ _ _ _ freq width center <<<$remote
+		printf '%s\n%s\n%s\n' "$freq" "${width:-20}" "${center:-$freq}" \
+			>"$MOCK_ROOT/freq"
+		;;
+	'iw dev wlan0 info')
+		if [ ! -f "$MOCK_ROOT/freq" ]; then
+			printf '5745\n20\n5745\n' >"$MOCK_ROOT/freq"
+		fi
+		{
+			read -r freq
+			read -r width
+			read -r center
+		} <"$MOCK_ROOT/freq"
+		printf 'Interface wlan0\n\tifindex 38\n\ttype %s\n\tchannel %s (%s MHz), width: %s MHz, center1: %s MHz\n\ttxpower 0.00 dBm\n' \
+			"$(cat "$MOCK_ROOT/iface")" "$(channel_of "$freq")" \
+			"$freq" "$width" "$center"
+		;;
+	mkdir\ -p\ /data/local/tmp/* | chmod\ 0755\ /data/local/tmp/*)
+		exit 0
+		;;
+	*/send_stage1_packet\ --clock)
+		next_clock
+		;;
+	*/send_stage1_packet\ --send\ wlan0\ *)
+		hex=${remote##* --send wlan0 }
+		send_packet "$hex"
+		;;
+	'echo Y > /sys/module/qca_cld3_peach_v2/parameters/frame_inject_experimental_phy')
+	printf 'Y\n' >"$MOCK_ROOT/param"
+		;;
+	'echo N > /sys/module/qca_cld3_peach_v2/parameters/frame_inject_experimental_phy')
+	printf 'N\n' >"$MOCK_ROOT/param"
+		;;
+	cat\ /sys/module/qca_cld3_peach_v2/parameters/frame_inject_experimental_phy)
+	cat "$MOCK_ROOT/param"
+		;;
+	*)
+	echo "mock adb: unhandled: $remote" >&2
+	exit 1
+		;;
+	esac
+	;;
+*)
+	echo "mock adb: unsupported command: $cmd" >&2
+	exit 1
+	;;
+esac
