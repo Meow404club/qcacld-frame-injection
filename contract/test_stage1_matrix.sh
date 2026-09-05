@@ -101,18 +101,18 @@ grep -q '^usage:' "$work/device-disabled.stderr"
 grep -q 'last_terminal_request_id' "$dir/run_stage1_matrix_device.sh"
 grep -q 'last_terminal_stage' "$dir/run_stage1_matrix_device.sh"
 grep -q 'last_terminal_errno' "$dir/run_stage1_matrix_device.sh"
-grep -q '^expected_stats_format=12$' "$dir/run_stage1_matrix_device.sh"
+grep -q '^expected_stats_format=13$' "$dir/run_stage1_matrix_device.sh"
 grep -q '^expected_device_cases=642$' "$dir/run_stage1_matrix_device.sh"
 grep -q '^expected_plan_sha256=823900054cd3ee6dbce28875f73f28e78fea607de17da3385e78c8871abf263a$' \
 	"$dir/run_stage1_matrix_device.sh"
 grep -q '^expected_sender_sha256=c2795e6b612c065fd464a97251276ad61c0f7a5484bd7d4767fdd882adc10afc$' \
 	"$dir/run_stage1_matrix_device.sh"
-grep -q '^expected_build_id=4c13f3b3f0b8f03d6904dd871af39164e18afa57$' \
+grep -q '^expected_build_id=914714cb6f296f35f093bf393bfea47c4982897c$' \
 	"$dir/run_stage1_matrix_device.sh"
-grep -q '^expected_common_image_sha256=8108dcdb0da9102c8b29c1ca67f596bc0042c1fd696f6c29d4141ab0c3e46153$' \
+grep -q '^expected_common_image_sha256=9f7556fc1a9fabb2f48860455e99eb555b8ca955bf79f77c92dc0265fb81ae2c$' \
 	"$dir/run_stage1_matrix_device.sh"
-grep -q '^expected_stats_format=12$' "$dir/run_stage0_preflight_device.sh"
-grep -q '^expected_selftests=407$' "$dir/run_stage0_preflight_device.sh"
+grep -q '^expected_stats_format=13$' "$dir/run_stage0_preflight_device.sh"
+grep -q '^expected_selftests=409$' "$dir/run_stage0_preflight_device.sh"
 grep -q '^device_execution_enabled=1$' "$dir/run_stage0_preflight_device.sh"
 set +e
 sh "$dir/run_stage0_preflight_device.sh" S --clean-boot --selftest-only \

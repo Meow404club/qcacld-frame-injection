@@ -1,11 +1,11 @@
-# AGENT_HANDOFF - Stage 2 Full-Flow External OTA Validation Kit (v11i, v20a build)
+# AGENT_HANDOFF - Stage 2 Full-Flow External OTA Validation Kit (v11j, v21 build)
 
 ## Scope and authority
 
 This kit validates the qcacld3 frame-injection path (helper idle reclaim + capability owner table) on a
 OnePlus 13 (Peach v2) whose loaded module Build ID is
-`4c13f3b3f0b8f03d6904dd871af39164e18afa57` (source revision
-`30442b8029b0+dirty-20260906-selftest-vht-vectors-v20a`; stats format v12,
+`914714cb6f296f35f093bf393bfea47c4982897c` (source revision
+`698efe09e8b8+dirty-20260906-observability-admin-knobs-v21`; stats format v12,
 capabilities v12, selftests 407). It
 contains no kernel image or AK3; the device must already run that build.
 

@@ -26,9 +26,9 @@
 
 set -uo pipefail
 
-expected_build_id=4c13f3b3f0b8f03d6904dd871af39164e18afa57
-expected_source_rev=30442b8029b0+dirty-20260906-selftest-vht-vectors-v20a
-expected_stats_format=12
+expected_build_id=914714cb6f296f35f093bf393bfea47c4982897c
+expected_source_rev=698efe09e8b8+dirty-20260906-observability-admin-knobs-v21
+expected_stats_format=13
 expected_sender_sha256=c2795e6b612c065fd464a97251276ad61c0f7a5484bd7d4767fdd882adc10afc
 expected_case_id=frame.pv0.mgmt.12.deauthentication.minimal
 expected_setfreq_cases=109

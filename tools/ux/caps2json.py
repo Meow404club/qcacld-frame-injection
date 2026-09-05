@@ -33,7 +33,7 @@ def selftest():
     sample = (
         "# header comment\n"
         "capabilities_version=14\n"
-        "stats_format_version=12\n"
+        "stats_format_version=13\n"
         "tx_power=param_default_on:s8_dbm_x2_half_dbm_units:ota_unproven\n"
         "selftests=407\n"
         "no_value_line_without_equals\n"

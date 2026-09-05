@@ -26,7 +26,7 @@ set -u
 MOCK_ROOT=${MOCK_ROOT:?MOCK_ROOT not set}
 MOCK_CAPTURE=${MOCK_CAPTURE:-}
 MOCK_SERIAL=DRYRUN123
-note_id=${MOCK_BUILD_ID:-4c13f3b3f0b8f03d6904dd871af39164e18afa57}
+note_id=${MOCK_BUILD_ID:-914714cb6f296f35f093bf393bfea47c4982897c}
 
 mkdir -p "$MOCK_ROOT"
 log() { printf '%s\n' "$*" >>"$MOCK_ROOT/adb-call.log"; }
@@ -69,7 +69,7 @@ class_of() { # hex -> knob_family|negative|(empty=unconditional)
 
 emit_stats() {
 	cat <<EOF
-format_version=12
+format_version=13
 source_rev=dryrun-mock-v13b
 state=ready
 fatal_latched=0

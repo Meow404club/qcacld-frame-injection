@@ -5,7 +5,7 @@
 （HT/VHT/HE/power/antenna 16 向量 A/B）、off-channel 直通、FCS 源裁决、6 GHz 与
 构造宽度会话，v11 起新增 **P7 PMF CCMP 已知钥终裁**与 **P8 peer 固定速率空口
 A/B**（条件性）。针对 v19 构建（模块 Build ID
-`4c13f3b3f0b8f03d6904dd871af39164e18afa57`，capabilities v12；自编模块可用
+`914714cb6f296f35f093bf393bfea47c4982897c`，capabilities v12；自编模块可用
 `--expected-build-id` 授权）。套件不含内核包；手机必须事先运行该构建。只在自有
 或明确授权、隔离的无线环境使用。
 

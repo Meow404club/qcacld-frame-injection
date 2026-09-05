@@ -2,7 +2,7 @@
 
 本套件用于在**授权的隔离无线环境**中，用独立监听网卡验证 OnePlus 13 帧注入的空口
 行为。套件不包含内核包或 AK3；手机必须已经运行模块 Build ID
-`4c13f3b3f0b8f03d6904dd871af39164e18afa57`（v20a 构建）。v5 kit 起修复了 v4 的两个
+`914714cb6f296f35f093bf393bfea47c4982897c`（v20a 构建）。v5 kit 起修复了 v4 的两个
 包装问题：zip 内脚本已带执行位（无需再 chmod +x）；verifier 自动跳过监听工具混入
 的自身 IGMP/MLD 非 radiotap 记录（无需再手工剔除 pcap）。v8 起含 P3-P6 全流程（PHY A/B/offchannel/6G/宽度）；v9 修复 v8 回传坐实的 12 条 phy_ab 脚本缺陷并升级提交证据语义；v10 按真机测得的固件边界把 80/160MHz 家族向量降为负向量；v11 新增 P7 PMF CCMP 已知钥终裁与 P8 peer 固定速率 A/B（详见 README"v11/v10 相对前版的变化"）。
 

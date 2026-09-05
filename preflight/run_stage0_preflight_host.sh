@@ -2,9 +2,9 @@
 
 set -uo pipefail
 
-expected_build_id=4c13f3b3f0b8f03d6904dd871af39164e18afa57
-expected_source_rev=30442b8029b0+dirty-20260906-selftest-vht-vectors-v20a
-expected_selftests=407
+expected_build_id=914714cb6f296f35f093bf393bfea47c4982897c
+expected_source_rev=698efe09e8b8+dirty-20260906-observability-admin-knobs-v21
+expected_selftests=409
 
 usage()
 {

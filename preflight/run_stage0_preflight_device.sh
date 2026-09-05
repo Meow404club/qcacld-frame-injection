@@ -5,10 +5,10 @@
 # flashing/rebooting and execution remain operator-only.
 set -u
 
-expected_build_id=4c13f3b3f0b8f03d6904dd871af39164e18afa57
-expected_source_rev=30442b8029b0+dirty-20260906-selftest-vht-vectors-v20a
-expected_stats_format=12
-expected_selftests=407
+expected_build_id=914714cb6f296f35f093bf393bfea47c4982897c
+expected_source_rev=698efe09e8b8+dirty-20260906-observability-admin-knobs-v21
+expected_stats_format=13
+expected_selftests=409
 expected_firmware_sha256=f89a5348a4076d4db062eb335ac97b5fb028397bd3d21c96a837fb138503d84e
 expected_bdf_sha256=b95a047cda7ab3d23010f7cdc0dd031bc865fbf369191a55df6a44a574d4cccd
 device_execution_enabled=1

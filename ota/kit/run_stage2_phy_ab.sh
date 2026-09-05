@@ -47,7 +47,7 @@ set -uo pipefail
 here=$(cd -- "$(dirname -- "$0")" && pwd)
 stage1_dir=$here
 
-expected_build_id=4c13f3b3f0b8f03d6904dd871af39164e18afa57
+expected_build_id=914714cb6f296f35f093bf393bfea47c4982897c
 
 usage()
 {
