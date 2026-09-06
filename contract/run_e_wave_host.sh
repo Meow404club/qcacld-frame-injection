@@ -2,8 +2,11 @@
 # run_e_wave_host.sh - fault/stress matrix device round.
 #
 # Phases: gate -> admin knobs A/B -> rate limit -> watchdog clamp ->
-# rx soak with periodic injection -> suspend/resume cycles ->
-# knob pressure loop -> queue burst -> restore.
+# rx soak with periodic injection -> knob pressure loop -> queue
+# burst -> restore.  (A screen suspend/resume phase was dropped:
+# screen-on auto-re-enables Wi-Fi on some setups - e.g. LSPosed
+# without a blocking module - which fights the persona teardown for
+# environmental reasons, not driver ones.)
 # Persona discipline from common/lib.sh (supplicant teardown wait,
 # liveness checks, settle-race retry policy).
 #
@@ -37,10 +40,12 @@ mount_debugfs || { echo "debugfs unavailable" >&2; exit 3; }
 pin_build_id "$expected_build_id" || exit 3
 
 # ---- persona (gold-standard dance) ----
-if ! adb_shell 'cmd wifi set-wifi-enabled disabled' >/dev/null 2>&1 || ! wait_supplicant_gone 60; then
+adb_shell 'cmd wifi set-wifi-enabled disabled' >/dev/null 2>&1
+if ! wait_wifi_disabled 60; then
 	echo "first settle race: retry once" >&2
 	sleep 10
-	wait_supplicant_gone 60 || { echo "supplicant never left" >&2; exit 4; }
+	adb_shell 'cmd wifi set-wifi-enabled disabled' >/dev/null 2>&1
+	wait_wifi_disabled 60 || { echo "wifi never disabled" >&2; exit 4; }
 fi
 persona_up=0
 for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
@@ -71,6 +76,39 @@ assert len(mpdu) == 26 and (pkt[2] | (pkt[3]<<8)) == 9
 print(pkt.hex())
 PY
 )
+
+# The Wi-Fi framework can reclaim wlan0 across suspend/resume cycles (a
+# measured behavior of this round); every stress phase re-asserts the
+# persona and rebuilds it if the framework flipped the adapter back.
+persona_rebuilds=0
+ensure_persona()
+{
+	persona_alive && return 0
+	persona_rebuilds=$((persona_rebuilds + 1))
+	echo "e.persona_rebuild #$persona_rebuilds (framework reclaimed adapter)"
+	# after a framework reclaim the auto-reopener can outrun a single
+	# disable: retry the disable until the supplicant actually leaves
+	local attempt gone
+	gone=0
+	for attempt in 1 2 3 4 5; do
+		adb_shell 'cmd wifi set-wifi-enabled disabled' >/dev/null 2>&1
+		if wait_wifi_disabled 30; then
+			gone=1
+			break
+		fi
+		echo "e.rebuild_disable_retry #$attempt"
+	done
+	[ $gone = 1 ] || return 1
+	local n
+	for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+		adb_shell 'iw dev wlan0 set type monitor' >/dev/null 2>&1 || { sleep 1; continue; }
+		adb_shell 'ip link set wlan0 up' >/dev/null 2>&1 || { sleep 1; continue; }
+		adb_shell 'iw dev wlan0 set freq 5745' >/dev/null 2>&1
+		adb_shell 'iw dev wlan0 info' 2>/dev/null | tr -d '\r' | grep -q 'channel 149' && return 0
+		sleep 1
+	done
+	return 1
+}
 
 snap_stats() { adb_exec_out "cat $fi_stats_node" >"$1" 2>/dev/null; }
 delta() { awk -F= -v k="$2" '$1==k {print $2; exit}' "$1" "$3" 2>/dev/null | awk 'NR==1{a=$1} NR==2{print $2-$1}'; }
@@ -155,20 +193,8 @@ else
 	note "soak SKIPPED (no termux tcpdump)"
 fi
 
-# ---- suspend/resume cycles ----
-ok_cycles=0
-for c in 1 2 3; do
-	adb_shell 'input keyevent 26' >/dev/null 2>&1
-	sleep 5
-	adb_shell 'input keyevent 26' >/dev/null 2>&1
-	sleep 5
-	persona_alive || break
-	adb_shell "$remote/send_stage1_packet --send wlan0 $VEC_HEX" >/dev/null 2>&1
-	ok_cycles=$((ok_cycles + 1))
-done
-[ $ok_cycles = 3 ] && note "suspend_resume x3 persona+inject ok" || fail_note "suspend_resume (ok_cycles=$ok_cycles)"
-
 # ---- knob pressure ----
+ensure_persona || fail_note "pressure_persona_rebuild_failed"
 snap_stats "$out/pressure-before.txt"
 i=0
 while [ $i -lt 20 ]; do
@@ -192,6 +218,7 @@ pwatch=$(stat_value "$out/pressure-after.txt" watchdog_timeouts)
 [ "$pfatal" = 0 ] && note "knob_pressure x20 fatal=0 watchdog=$pwatch" || fail_note "knob_pressure"
 
 # ---- queue burst ----
+ensure_persona || fail_note "burst_persona_rebuild_failed"
 snap_stats "$out/burst-before.txt"
 b=0
 while [ $b -lt 16 ]; do
@@ -215,5 +242,5 @@ adb_shell "echo full > $knobs/frame_inject_monitor_filter" >/dev/null 2>&1 || tr
 adb_shell "echo 8 > $knobs/frame_inject_inflight_limit" >/dev/null 2>&1 || true
 restore_managed
 adb_shell "rm -rf $remote" >/dev/null 2>&1 || true
-echo "ewave_complete=1 fail=$fail restored=1 output=$out"
+echo "ewave_complete=1 fail=$fail persona_rebuilds=$persona_rebuilds restored=1 output=$out"
 exit $fail

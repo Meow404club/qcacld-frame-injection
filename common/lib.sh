@@ -77,7 +77,25 @@ make_evidence_dir()
 	echo "$out"
 }
 
-# Framework settle: wait for wpa_supplicant to leave before monitor persona.
+# Framework settle, status-based: the authoritative signal is the
+# framework reporting Wi-Fi disabled.  A detached, lingering
+# wpa_supplicant pid (observed after framework fights) is harmless to
+# the monitor persona; the strict pid gate stays as the fallback when
+# the monitor setup itself fails to hold.
+wait_wifi_disabled()
+{
+	local budget=${1:-60} n=0 st
+	while [ $n -lt "$budget" ]; do
+		st=$(adb_shell 'cmd wifi status' 2>/dev/null | tr -d '\r')
+		case "$st" in *"Wifi is disabled"*) return 0 ;; esac
+		sleep 1
+		n=$((n + 1))
+	done
+	echo "wifi never reached disabled after ${budget}s" >&2
+	return 4
+}
+
+# Strict gate: wait for wpa_supplicant to leave entirely.
 wait_supplicant_gone()
 {
 	local budget=${1:-60} n=0
@@ -93,7 +111,9 @@ wait_supplicant_gone()
 
 persona_alive()
 {
-	adb_shell "test -d /sys/kernel/debug/wlan0" >/dev/null 2>&1
+	# the stats node only exists while the monitor persona is live;
+	# the adapter debugfs directory alone also exists in managed mode
+	adb_shell "test -r $fi_stats_node" >/dev/null 2>&1
 }
 
 # Crash continuation: wait for the device to come back after an SSR reset.

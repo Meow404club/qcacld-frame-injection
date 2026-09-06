@@ -1,0 +1,190 @@
+case_probe=PASS ret=0 expected=0
+case_null_data=PASS ret=0 expected=0
+case_ack=PASS ret=0 expected=0
+case_fcs_passthrough=PASS ret=0 expected=0
+case_bad_fcs=PASS ret=-74 expected=-74
+case_unsupported_flags=PASS ret=-95 expected=-95
+case_unsupported_tx_flags=PASS ret=-95 expected=-95
+case_probe_txflags_parse=PASS ret=0 expected=0
+case_unsupported_rate=PASS ret=-95 expected=-95
+case_legacy_rates=PASS ret=0 expected=0
+case_pv0_64_class_matrix=PASS
+case_non_pv0_48_class_matrix=PASS
+case_radiotap_xchannel_reaches_hdd=PASS
+case_radiotap_timestamp_reaches_hdd=PASS
+case_radiotap_he_mu_reaches_hdd=PASS
+case_radiotap_he_mu_other_reaches_hdd=PASS
+case_radiotap_zero_len_psdu_reaches_hdd=PASS
+case_radiotap_lsig_reaches_hdd=PASS
+case_radiotap_extended_namespace=PASS
+case_radiotap_tlv_usig_reaches_hdd=PASS
+case_radiotap_tlv_eht_reaches_hdd=PASS
+case_radiotap_tlv_usig_eht_stream=PASS
+case_radiotap_tlv_truncated_header=PASS
+case_radiotap_tlv_length_overrun=PASS
+case_radiotap_tlv_padding_overrun=PASS
+case_reason_parser_einval_malformed=PASS
+case_reason_parser_eopnotsupp_backend=PASS
+case_reason_backend_eio_fw=PASS
+case_reason_completion_fw=PASS
+case_reason_timeout=PASS
+case_reason_context_eagain=PASS
+case_reason_context_euclean=PASS
+case_reason_none_einval_backend=PASS
+case_reason_names_stable=PASS
+case_reason_range_stable=PASS
+case_radiotap_rx_vht_mcs_nss_mapping=PASS
+case_radiotap_rx_vht_1ss_audit_bytes=PASS
+case_radiotap_rx_chain_bitmap=PASS
+case_radiotap_rx_chain_bitmap_bounds=PASS
+case_mon_filter_preset_full=PASS
+case_mon_filter_preset_mgmt=PASS
+case_mon_filter_preset_ctrl=PASS
+case_mon_filter_preset_mgmt_ctrl=PASS
+case_mon_filter_preset_reject=PASS
+case_mon_filter_class_preset_verdicts=PASS
+case_mon_filter_class_full_and_fp_only=PASS
+case_mon_filter_class_ext_fail_open=PASS
+case_raw_tx_ofdm_6m_retries=PASS
+case_raw_tx_cck_11m_retry_max=PASS
+case_phy_ht_mcs0_bw20=PASS
+case_phy_ht_mcs7_bw40=PASS
+case_phy_ht_bw_unknown_defaults_20=PASS
+case_phy_ht_bw20l_is_20=PASS
+case_phy_ht_mcs9_nss2=PASS
+case_phy_vht80_nss1_mcs3=PASS
+case_phy_vht160_nss2_mcs8=PASS
+case_phy_vht40_nss2_mcs9=PASS
+case_phy_he_su_mcs7_bw80_nss2=PASS
+case_phy_he_nsts_unknown_keeps_nss=PASS
+case_phy_he_bw_unknown_defaults_20=PASS
+case_phy_family_replaces_legacy_preamble=PASS
+case_phy_fw_width_gate_vht80=PASS
+case_phy_fw_width_gate_vht160=PASS
+case_phy_fw_width_gate_he80=PASS
+case_phy_fw_width_pass_vht40=PASS
+case_phy_fw_width_pass_ht40=PASS
+case_phy_fw_width_legacy_exempt=PASS
+case_ext_class_submit_gate=PASS
+case_pmf_wfa_txflag_mapping=PASS
+case_probe_txflag_mode_select=PASS
+case_probe_txflag_mode_conflicts=PASS
+case_probe_txflag_cfr_beamform_apply=PASS
+case_peer_rate_ratecode_parse=PASS
+case_admin_rate_admit_math=PASS
+case_admin_watchdog_clamp=PASS
+case_family_wide_bypass_eligibility=PASS
+case_family_wide_bypass_ratecode=PASS
+case_family_wide_bypass_gate_contract=PASS
+case_phy_vht_beamformed_tlv_map=PASS
+case_vht_beamformed_parse_accept=PASS
+case_phy_antenna_chain_mask=PASS
+case_phy_tx_power_half_dbm_units=PASS
+case_radiotap_version=PASS ret=-93 expected=-93
+case_short_radiotap=PASS ret=-22 expected=-22
+case_radiotap_beyond_buffer=PASS ret=-22 expected=-22
+case_mcs_experimental_default_on=PASS
+case_antenna_index_parsed=PASS
+case_antenna_index_range=PASS ret=-95 expected=-95
+case_vht_bandwidth_spec_values=PASS ret=-22 expected=-22
+case_vht_nss_range=PASS ret=-22 expected=-22
+case_he_mcs_range=PASS ret=-95 expected=-95
+case_he_nsts_range=PASS ret=-95 expected=-95
+case_mcs_he_conflict=PASS ret=-22 expected=-22
+case_he_su_parsed=PASS
+case_he_mu_format_rejected=PASS
+case_channel=PASS ret=0 expected=0
+case_data_retries_zero=PASS ret=0 expected=0
+case_data_retries_max=PASS ret=0 expected=0
+case_data_retries_range=PASS ret=-34 expected=-34
+case_unsupported_rts_retries=PASS ret=-95 expected=-95
+case_protected_short_rejected=PASS ret=-22 expected=-22
+case_protected_min_iv=PASS ret=0 expected=0
+case_amsdu_single_unpadded=PASS ret=0 expected=0
+case_amsdu_truncated_subframe=PASS ret=-22 expected=-22
+case_amsdu_multi_padded=PASS ret=0 expected=0
+case_amsdu_tail_garbage=PASS ret=-22 expected=-22
+case_oversized_radiotap=PASS ret=-22 expected=-22
+case_missing_frame=PASS ret=-22 expected=-22
+case_pv1_minimal=PASS ret=0 expected=0
+case_fc_reserved_version=PASS ret=0 expected=0
+case_reserved_mgmt_subtype=PASS ret=0 expected=0
+case_short_assoc=PASS ret=-22 expected=-22
+case_assoc=PASS ret=0 expected=0
+case_reserved_control_subtype=PASS ret=0 expected=0
+case_short_bar=PASS ret=-22 expected=-22
+case_bar=PASS ret=0 expected=0
+case_short_qos_a4_ht=PASS ret=-22 expected=-22
+case_qos_a4_ht=PASS ret=0 expected=0
+case_data_zero_payload=PASS ret=0 expected=0
+case_fragment_first=PASS ret=0 expected=0
+case_fragment_last=PASS ret=0 expected=0
+case_data_2304_payload=PASS ret=0 expected=0
+case_mpdu_max=PASS ret=0 expected=0
+case_missing_fcs=PASS ret=-22 expected=-22
+case_oversized_mpdu=PASS ret=-90 expected=-90
+case_null_buffer=PASS ret=-22 expected=-22
+case_u16_length=PASS ret=-22 expected=-22
+case_helper_generation=PASS
+case_single_link_policy_plain=PASS
+case_single_link_policy_ml_container=PASS
+case_single_link_policy_link_adapter=PASS
+case_single_link_policy_ml_associated=PASS
+case_single_link_policy_mlo_vdev=PASS
+case_context_fixture_alloc=PASS
+case_context_invalid_self=PASS
+case_context_missing_template_5g=PASS
+case_context_missing_template_24g=PASS
+case_context_missing_template_channel_14=PASS
+case_context_managed_template=PASS
+case_context_cross_channel_rejected=PASS
+case_context_width_widen_rejected=PASS
+case_context_width_narrow_to_20=PASS
+case_context_width_narrow_to_40=PASS
+case_context_self_bssid_rejected=PASS
+case_context_6g_without_template=PASS
+case_context_invalid_frequency=PASS
+case_context_constructed_5g_legacy=PASS
+case_context_constructed_24g_legacy=PASS
+case_context_constructed_6g_he=PASS
+case_context_constructed_80mhz_ht_vht=PASS
+case_context_constructed_40mhz_ht=PASS
+case_context_constructed_24g_40mhz_ht_no_vht=PASS
+case_context_constructed_narrow_bw_rejected=PASS
+case_context_constructed_invalid_freq=PASS
+case_context_constructed_bssid_randomized=PASS
+case_vdev_delete_wrong_id=PASS
+case_vdev_delete_first_completion=PASS
+case_vdev_delete_duplicate=PASS
+case_vdev_delete_late_unregistered=PASS
+case_wma_owner_ledger=PASS tests=28 failed=0 status=0
+case_wma_context_contract=PASS tests=25 failed=0 status=0
+case_wma_helper_responses=PASS tests=66 failed=0 status=0
+case_wma_target_quiesce=PASS tests=3 failed=0 status=0
+case_wma_teardown_claim=PASS tests=38 failed=0 status=0
+case_suspend_state=PASS tests=6 failed=0 ret=0
+case_runtime_state=PASS tests=64 failed=0 ret=0
+case_hop_parse_multi=PASS ret=0 expected=0
+case_hop_parse_min_dwell=PASS ret=0 expected=0
+case_hop_parse_max_dwell_80p80=PASS ret=0 expected=0
+case_hop_parse_160=PASS ret=0 expected=0
+case_hop_parse_wrong_verb=PASS ret=-22 expected=-22
+case_hop_parse_no_channels=PASS ret=-22 expected=-22
+case_hop_parse_dwell_low=PASS ret=-22 expected=-22
+case_hop_parse_dwell_high=PASS ret=-22 expected=-22
+case_hop_parse_bad_width=PASS ret=-22 expected=-22
+case_hop_parse_freq_low=PASS ret=-22 expected=-22
+case_hop_parse_freq_high=PASS ret=-22 expected=-22
+case_hop_parse_stop_verb=PASS ret=-22 expected=-22
+case_hop_parse_null=PASS ret=-22 expected=-22
+case_survey_cca_delta=PASS ret=0 expected=0
+case_survey_cca_delta_wrap=PASS ret=0 expected=0
+case_survey_cca_delta_prev_invalid=PASS ret=-11 expected=-11
+case_survey_cca_delta_no_advance=PASS ret=-11 expected=-11
+case_survey_cca_delta_busy_gt_cycle=PASS ret=-11 expected=-11
+case_survey_cca_delta_tx_gt_cycle=PASS ret=-11 expected=-11
+case_survey_cca_delta_null=PASS ret=-22 expected=-22
+tests=409
+passed=409
+failed=0
+verdict=PASS
