@@ -13,40 +13,48 @@
 set -u
 here=$(cd -- "$(dirname -- "$0")" && pwd)
 repo=$(cd -- "$here/.." && pwd)
-wt=$(cd -- "$repo/../.." && pwd)   # vendor/qcom/opensource/wlan by default
-wt=$(cd -- "$wt/../.." && pwd)     # kernel tree root
-out=${2:-$repo/evidence-pack-$(date -u +%Y%m%dT%H%M%SZ)}
+wt=
+out=
 
 while [ $# -gt 0 ]; do
 	case $1 in
 	--working-tree) wt=$2; shift 2 ;;
 	--out) out=$2; shift 2 ;;
-	*) echo "usage: pack_evidence.sh [--working-tree DIR] [--out DIR]" >&2; exit 2 ;;
+	*) echo "usage: pack_evidence.sh --working-tree DIR [--out DIR]" >&2; exit 2 ;;
 	esac
 done
+: "${wt:?--working-tree DIR is required (the wlan tree holding tmp/)}"
+out=${out:-$repo/evidence-pack-$(date -u +%Y%m%dT%H%M%SZ)}
+case "$out/" in "$wt/"*|"$(cd -- "$repo" && pwd)/"*) echo "refusing: --out inside the working tree" >&2; exit 2 ;; esac
 
 mkdir -p "$out/capabilities" "$out/runs" "$out/external" "$out/suites" || exit 3
 
 echo "== capability snapshots (latest per suite run)"
 find "$wt/tmp/suites" -name capabilities.txt -newer "$wt/tmp/README.md" 2>/dev/null | head -0
-latest_cap=$(ls -t "$wt/tmp/suites"/d-wave/host-capture-*/capabilities.txt 2>/dev/null | head -1)
+latest_cap=$(ls -t "$wt"/tmp/suites/*/host-capture-*/capabilities.txt 2>/dev/null | head -1)
 [ -n "$latest_cap" ] && cp "$latest_cap" "$out/capabilities/latest-device-round.txt"
+echo "capability snapshot: ${latest_cap:-none found}"
 
 echo "== run inventory"
 {
 	echo "# evidence-dir build-id-hint verdict-files"
 	for d in "$wt/tmp/suites"/*/host-capture-*; do
 		[ -d "$d" ] || continue
-		bid=$(grep -l . "$d"/stats-before.txt 2>/dev/null | head -1 | xargs -r awk -F= '/^source_rev=/{print $2; exit}' 2>/dev/null)
+		bid=$(grep -h -m1 '^source_rev=' "$d"/stats-*.txt 2>/dev/null | head -1 | cut -d= -f2-)
 		echo "$(basename "$d")	${bid:-unknown}	$(ls "$d" | wc -l) files"
 	done
-} >"$out/runs/inventory.tsv"
+}
+for d in "$repo"/*/host-capture-* "$repo"/archives/*/host-capture-*; do
+	[ -d "$d" ] || continue
+	bid=$(grep -h -m1 '^source_rev=' "$d"/stats-*.txt 2>/dev/null | head -1 | cut -d= -f2-)
+	echo "repo:$(basename "$(dirname "$d")")/$(basename "$d")	${bid:-unknown}	$(ls "$d" | wc -l) files"
+done >>"$out/runs/inventory.tsv"
 
 echo "== external OTA archives"
-for z in "$wt"/tmp/returns/*/; do
-	[ -d "$z" ] || continue
-	name=$(basename "$z")
-	find "$z" -maxdepth 1 -name "*.zip" -exec cp {} "$out/external/$name-{}" \; 2>/dev/null
+find "$wt/tmp/returns" -name "*.zip" -size -200M 2>/dev/null | while read -r z; do
+	rel=$(basename "$(dirname "$z")")-$(basename "$z")
+	cp "$z" "$out/external/$rel"
+	echo "archived: $rel"
 done
 
 echo "== suite inventory (this repo)"
