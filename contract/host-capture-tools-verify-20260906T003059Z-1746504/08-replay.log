@@ -1,0 +1,6 @@
+sent rc=0 completion=none(yet) #0
+sent rc=0 completion=none(yet) #1
+replayed=2 mode=adb
+sent rc=0 completion_seq=6 status=3 rate=1405 #0
+sent rc=0 completion_seq=7 status=3 rate=9571 #1
+replayed=2 mode=adb

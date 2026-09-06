@@ -1,0 +1,5 @@
+send rc=0
+verdict completion: none(yet) - check /sys/kernel/debug/wlan0/frame_inject_stats drop_reason_* counters
+send rc=0
+verdict completion: seq=4 status=3 ppdu=9522 rate_kbps=0
+NO_ACK (transmitted, no acknowledgment - normal for forged broadcast)

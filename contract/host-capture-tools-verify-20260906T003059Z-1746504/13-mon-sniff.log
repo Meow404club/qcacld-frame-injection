@@ -1,0 +1,5 @@
+capture: /data/local/tmp/mon-sniff-20260906T084309/full.pcap (103769 bytes)
+airodump csv: /data/local/tmp/mon-sniff-20260906T084309/airodump-01.csv
+tcpdump: listening on wlan0, link-type IEEE802_11_RADIO (802.11 plus radiotap header), snapshot length 262144 bytes
+463 packets captured
+469 packets received by filter

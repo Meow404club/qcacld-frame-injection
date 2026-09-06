@@ -25,10 +25,25 @@ esac
 adb push "$sender_src" "$remote" >/dev/null 2>&1 || { echo "push failed" >&2; exit 3; }
 adb shell su -c "chmod 0755 $remote" >/dev/null 2>&1
 
-before=$(adb exec-out su -c "tail -1 $comp" 2>/dev/null | tr -d '\r')
+if ! adb shell su -c "test -r $comp" >/dev/null 2>&1; then
+	echo "monitor persona down (stats node absent): run mon up first" >&2
+	exit 4
+fi
+before=$(adb exec-out su -c "cat $comp | tail -1" 2>/dev/null | tr -d '\r')
 rc=$(adb shell su -c "$remote --send wlan0 $hex" >/dev/null 2>&1; echo $?)
-sleep 1
-after=$(adb exec-out su -c "tail -1 $comp" 2>/dev/null | tr -d '\r')
+# cold helper rebuild can take ~10 s before the first completion lands
+after=
+n=0
+while [ $n -lt 30 ]; do
+	sleep 0.5
+	after=$(adb exec-out su -c "cat $comp | tail -1" 2>/dev/null | tr -d '\r')
+	# accept only a real ledger row (the adapter can churn mid-poll and
+	# turn reads into error text)
+	case "$after" in
+	[0-9]*)	[ "$after" != "$before" ] && break ;;
+	esac
+	n=$((n + 1))
+done
 
 echo "send rc=$rc"
 if [ -n "$after" ] && [ "$after" != "$before" ]; then

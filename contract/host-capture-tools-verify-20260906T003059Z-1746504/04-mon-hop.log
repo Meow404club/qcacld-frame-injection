@@ -1,0 +1,4 @@
+hopping: 5180 5240 5745 5825 @400ms
+active=1
+last_freq=5745
+stopped

@@ -36,4 +36,4 @@ adb shell su -c "echo $idle_boost > $idle_node" || { echo "idle knob write faile
 echo "helper idle boosted to ${idle_boost}ms (restores to '${prev:-0}' on exit)"
 
 exec python3 "$here/../replay/mdk4_lite.py" "$mode" --count "$count" \
-	--pps "$pps" --send-mode adb "$@"
+	--pps "$pps" --mode-out adb "$@"

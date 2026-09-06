@@ -1,0 +1,6 @@
+send rc=0
+verdict completion: none(yet) - check /sys/kernel/debug/wlan0/frame_inject_stats drop_reason_* counters
+send rc=0
+verdict completion: none(yet) - check /sys/kernel/debug/wlan0/frame_inject_stats drop_reason_* counters
+send rc=0
+verdict completion: none(yet) - check /sys/kernel/debug/wlan0/frame_inject_stats drop_reason_* counters

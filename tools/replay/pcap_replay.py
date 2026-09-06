@@ -85,14 +85,13 @@ def build_eapol_key_frame(bssid, client, eapol_type, key_info,
 def template_frame(name, params):
     bssid = params.get("bssid", "020000000001")
     client = params.get("client", "020000000002")
-    nonce = bytes.fromhex(params.get(
-        "anonce", "00" * 32))[:32].ljust(32, b"\x00")
+    nonce = bytes.fromhex(params.get("anonce") or "00" * 32)[:32].ljust(32, b"\x00")
     if name == "eapol-m3":
         # M3: KEY_ACK|KEY_MIC|SECURE|PAIRWISE (0x13c2), replay counter 2
         body = build_eapol_key_frame(bssid, client, 3, 0x13C2, 2, nonce)
     elif name == "pmkid":
         # M1: REQUEST|PAIRWISE|KEY_ACK (0x0108) carrying a PMKID KDE
-        pmkid = bytes.fromhex(params.get("pmkid", "00" * 16))[:16]
+        pmkid = bytes.fromhex(params.get("pmkid") or "00" * 16)[:16]
         kde = b"\xdd\x14\x00\x0f\xac\x04" + pmkid
         body = build_eapol_key_frame(bssid, client, 3, 0x0108, 1,
                                      nonce, payload=kde)

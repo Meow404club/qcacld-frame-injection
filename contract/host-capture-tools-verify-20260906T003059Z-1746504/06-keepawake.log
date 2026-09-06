@@ -1,0 +1,2 @@
+keepawake on (svc power stayon true; disable with 'off')
+keepawake off

@@ -1,0 +1,4 @@
+sent rc=0 completion_seq=8 status=0 rate=1436 ssid=net-7461 bssid=02aa19797cbb
+sent rc=0 completion_seq=9 status=0 rate=9602 ssid=net-9253 bssid=02fc36c76b1b
+sent rc=0 completion_seq=10 status=0 rate=9603 ssid=net-8088 bssid=02e58e6bfe40
+generated=3 mode=adb

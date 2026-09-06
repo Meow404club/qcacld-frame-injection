@@ -154,14 +154,19 @@ class Sender:
                 "%s --send %s %s" % (self._remote_bin or "$SENDER",
                                      self.interface, hexstr))
             return "script+1"
-        # adb mode: per-frame verdict callback (spec item 3)
+        # adb mode: per-frame verdict callback (spec item 3); the
+        # ledger row can trail a cold helper rebuild by seconds
         before = self._completions_tail()
         r = self._adb("shell", "su", "-c",
                       "%s --send %s %s" % (self._remote_bin,
                                            self.interface, hexstr))
         verdict = "sent rc=%d" % r.returncode
-        time.sleep(0.35)  # completion envelope margin
-        after = self._completions_tail()
+        after = None
+        for _ in range(12):
+            time.sleep(0.5)
+            after = self._completions_tail()
+            if after and after != before and after[:1].isdigit():
+                break
         if after and after != before:
             fields = after.split("\t")
             # TSV: seq ts status vdev desc ack_rssi pdev ppdu rate phymode ...

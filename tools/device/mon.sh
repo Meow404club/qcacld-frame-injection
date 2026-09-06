@@ -29,16 +29,18 @@ need_root()
 
 wifi_framework_off()
 {
+	# status-based gate: a detached lingering wpa_supplicant pid is
+	# harmless to the monitor persona (measured); what matters is the
+	# framework reporting Wi-Fi disabled and staying there
 	cmd wifi set-wifi-enabled disabled >/dev/null 2>&1 || true
 	n=0
 	while [ $n -lt $((WIFI_OFF_WAIT * 2)) ]; do
 		st=$(cmd wifi status 2>/dev/null | tr -d '\r')
-		supp=$(pidof wpa_supplicant 2>/dev/null | tr -d '\r\n')
-		echo "$st" | grep -q '^Wifi is disabled$' && [ -z "$supp" ] && return 0
+		case "$st" in *"Wifi is disabled"*) return 0 ;; esac
 		sleep 0.5
 		n=$((n + 1))
 	done
-	echo "wpa_supplicant still present after ${WIFI_OFF_WAIT}s" >&2
+	echo "wifi never reached disabled after ${WIFI_OFF_WAIT}s" >&2
 	return 1
 }
 

@@ -1,0 +1,26 @@
+== interface
+Interface wlan0
+	ifindex 53
+	wdev 0x18
+	addr 3e:b9:e0:92:35:db
+	type monitor
+	wiphy 0
+	channel 149 (5745 MHz), width: 20 MHz, center1: 5745 MHz
+	txpower 0.00 dBm
+== persona stats node: present
+== hop
+active=0
+generation=0
+dwell_ms=0
+channels=0
+next_index=0
+hops=0
+errors=0
+contended_ticks=0
+session_age_ms=0
+last_switch_ns=0
+last_error=0
+last_freq=0
+last_width=0
+semantics=unified_apply:park_on_error:external_set_wins
+syntax=start <dwell_ms> <freq>[@20|40|80|160|80p80] ... | stop
